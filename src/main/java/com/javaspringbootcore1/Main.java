@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         System.out.println("Hello, World!");
 
-        Student student = new Student(2L, "John Doe6", "john.doe66@example.com", 29);
+        Student student = new Student(7L, "John Doe7", "john.doe77@example.com", 29);
         StudentRepository studentRepository = new StudentRepository();
         studentRepository.createStudent(student);
 //        studentRepository.updateStudent();

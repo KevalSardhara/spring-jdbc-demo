@@ -11,30 +11,47 @@ public class StudentRepository {
     private String dbUrl = "jdbc:postgresql://localhost:5432/student_db";
     private String dbUser = "kevalsardhara";
     private String dbPassword = "123456";
+
     private String dbDriver = "org.postgresql.Driver";
+
     private Connection connection = null;
     private Statement statement = null;
+    private PreparedStatement preparedStatement = null;
 
 
 
-    public void createStudent(Student student) throws Exception {
+    public void createStudent(Student student) {
         try {
             // --------------------------------------------------- //
             Class.forName(dbDriver);
             connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            statement = connection.createStatement();
-            if (connection == null || statement == null) {
+
+//            Not need during use the prepared statement
+//            statement = connection.createStatement();
+
+
+            if (connection == null) {
                 throw new SQLException("Connection failed ERROR throws!");
             }
             System.out.println("Connection established successfully");
             // --------------------------------------------------- //
+            String sql = "INSERT INTO students(id, name, email, age) VALUES (?, ?, ?, ?)";
 
-            String sql = """
-                            INSERT INTO students(id, name, email, age) 
-                            VALUES ('%d', '%s','%s', '%d')
-                        """.formatted(student.getId(), student.getName(), student.getEmail(), student.getAge());
-            System.out.println(sql);
-            int result = statement.executeUpdate(sql); // CREATE, INSERT, DELETE
+            preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setLong(1, student.getId());
+            preparedStatement.setString(2, student.getName());
+            preparedStatement.setString(3, student.getEmail());
+            preparedStatement.setInt(4, student.getAge());
+
+            int result = preparedStatement.executeUpdate();
+
+//            String sql = """
+//                            INSERT INTO students(id, name, email, age)
+//                            VALUES ('%d', '%s','%s', '%d')
+//                        """.formatted(student.getId(), student.getName(), student.getEmail(), student.getAge());
+//            System.out.println(sql);
+//            int result = statement.executeUpdate(sql); // CREATE, INSERT, DELETE
 
             if (result > 0) {
                 System.out.println("Student created successfully");
@@ -43,17 +60,25 @@ public class StudentRepository {
             }
 
             // --------------------------------------------------- //
-            statement.close();
-            connection.close();
+//            statement.close();
+//            connection.close();
+
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
         } finally {
-            if (statement != null) {
-                statement.close();
+//            if (statement != null) {
+//                statement.close();
+//            }
+            try {
+                preparedStatement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            if (connection != null) {
+
+            try {
                 connection.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
