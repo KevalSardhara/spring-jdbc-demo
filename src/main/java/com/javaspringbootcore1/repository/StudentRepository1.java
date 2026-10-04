@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudentRepository {
+public class StudentRepository1 {
 
     private String dbUrl = "jdbc:postgresql://localhost:5432/student_db";
     private String dbUser = "kevalsardhara";
@@ -14,8 +14,6 @@ public class StudentRepository {
     private String dbDriver = "org.postgresql.Driver";
     private Connection connection = null;
     private Statement statement = null;
-
-
 
     public void createStudent(Student student) throws Exception {
         try {
@@ -29,11 +27,8 @@ public class StudentRepository {
             System.out.println("Connection established successfully");
             // --------------------------------------------------- //
 
-            String sql = """
-                            INSERT INTO students(id, name, email, age) 
-                            VALUES ('%d', '%s','%s', '%d')
-                        """.formatted(student.getId(), student.getName(), student.getEmail(), student.getAge());
-            System.out.println(sql);
+            String sql = "INSERT INTO students (id, name, email, age) VALUES (3, 'abc def', 'abc@gov.ac.com', 29)";
+
             int result = statement.executeUpdate(sql); // CREATE, INSERT, DELETE
 
             if (result > 0) {
@@ -47,6 +42,7 @@ public class StudentRepository {
             connection.close();
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("Failed to establish connection");
             throw e;
         } finally {
             if (statement != null) {
