@@ -14,30 +14,16 @@ public class StudentRepository {
 
     private String dbDriver = "org.postgresql.Driver";
 
-    private Connection connection = null;
-    private Statement statement = null;
-    private PreparedStatement preparedStatement = null;
-
-
-
     public void createStudent(Student student) {
-        try {
-            // --------------------------------------------------- //
+
+        String sql = "INSERT INTO students(id, name, email, age) VALUES (?, ?, ?, ?)";
+
+        try(
+                Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ) {
             Class.forName(dbDriver);
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-
-//            Not need during use the prepared statement
-//            statement = connection.createStatement();
-
-
-            if (connection == null) {
-                throw new SQLException("Connection failed ERROR throws!");
-            }
             System.out.println("Connection established successfully");
-            // --------------------------------------------------- //
-            String sql = "INSERT INTO students(id, name, email, age) VALUES (?, ?, ?, ?)";
-
-            preparedStatement = connection.prepareStatement(sql);
 
             preparedStatement.setLong(1, student.getId());
             preparedStatement.setString(2, student.getName());
@@ -45,189 +31,129 @@ public class StudentRepository {
             preparedStatement.setInt(4, student.getAge());
 
             int result = preparedStatement.executeUpdate();
-
 //            String sql = """
 //                            INSERT INTO students(id, name, email, age)
 //                            VALUES ('%d', '%s','%s', '%d')
 //                        """.formatted(student.getId(), student.getName(), student.getEmail(), student.getAge());
 //            System.out.println(sql);
 //            int result = statement.executeUpdate(sql); // CREATE, INSERT, DELETE
-
             if (result > 0) {
                 System.out.println("Student created successfully");
             } else {
                 System.out.println("Failed to create student");
             }
-
-            // --------------------------------------------------- //
-//            statement.close();
-//            connection.close();
-
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-//            if (statement != null) {
-//                statement.close();
-//            }
-            try {
-                preparedStatement.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            try {
-                connection.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
     }
 
-    public void updateStudent() throws Exception {
-        try {
-            // --------------------------------------------------- //
+    public void updateStudent(Student student, Long id) {
+            String sql = "UPDATE students SET name = ?, email = ?, age = ? WHERE id = ?";
+        try(
+                Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ) {
             Class.forName(dbDriver);
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            statement = connection.createStatement();
-            if (connection == null || statement == null) {
-                throw new SQLException("Connection failed ERROR throws!");
-            }
             System.out.println("Connection established successfully");
-            // --------------------------------------------------- //
 
-            String sql = "UPDATE students SET name = 'Keval Sardhara', email = 'keval.sardhara@ac.com', age = 25 WHERE id = 1";
+            preparedStatement.setString(1, student.getName());
+            preparedStatement.setString(2, student.getEmail());
+            preparedStatement.setInt(3, student.getAge());
+            preparedStatement.setLong(4, id);
 
-            int result = statement.executeUpdate(sql); // CREATE, INSERT, DELETE
+            int result = preparedStatement.executeUpdate(); // CREATE, INSERT, DELETE
 
             if (result > 0) {
                 System.out.println("Student updated successfully");
             } else {
                 System.out.println("Failed to updated student");
             }
-
-            // --------------------------------------------------- //
-            statement.close();
-            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to establish connection");
-            throw e;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
-    public void deleteStudent() throws Exception {
-        try {
-            // --------------------------------------------------- //
+    public void deleteStudent(Long id) throws Exception {
+            String sql = "DELETE FROM students WHERE id = ?";
+        try(
+                Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ) {
             Class.forName(dbDriver);
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            statement = connection.createStatement();
-            if (connection == null || statement == null) {
-                throw new SQLException("Connection failed ERROR throws!");
-            }
+
             System.out.println("Connection established successfully");
-            // --------------------------------------------------- //
-
-            String sql = "DELETE FROM students WHERE id = 1";
-
-            int result = statement.executeUpdate(sql); // CREATE, INSERT, DELETE
+            preparedStatement.setLong(1, id);
+            int result = preparedStatement.executeUpdate(); // CREATE, INSERT, DELETE
 
             if (result > 0) {
                 System.out.println("Student deleted successfully");
             } else {
                 System.out.println("Failed to delete student");
             }
-
-            // --------------------------------------------------- //
-            statement.close();
-            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Failed to establish connection");
             throw e;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
-    public void getStudent() throws Exception {
-        try {
-            // --------------------------------------------------- //
-            Class.forName(dbDriver);
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            statement = connection.createStatement();
-            if (connection == null || statement == null) {
-                throw new SQLException("Connection failed ERROR throws!");
-            }
-            System.out.println("Connection established successfully");
-            // --------------------------------------------------- //
-
-//            String sql = "SELECT * FROM students WHERE id = 1";
-            String sql = "SELECT * FROM students";
-
-            ResultSet result = statement.executeQuery(sql); // SELECT, READ
-
-            List<String> studentList = new ArrayList<>();
-
-            while (result.next()) {
-                Student student = mapToStudent(result);
-                String studentToString = student.toString();
-                studentList.add(studentToString);
-            }
-
-            System.out.println("StudentList : " + studentList);
-            // --------------------------------------------------- //
-            statement.close();
-            connection.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Failed to establish connection");
-            throw e;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
-        }
-    }
-
-    public void completeCrud() throws Exception {
-        try {
-            // --------------------------------------------------- //
-            Class.forName(dbDriver);
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            statement = connection.createStatement();
-            if (connection == null || statement == null) {
-                throw new SQLException("Connection failed ERROR throws!");
-            }
-            System.out.println("Connection established successfully");
-            // --------------------------------------------------- //
-
-//            String sql = "INSERT INTO students (id, name, email, age) VALUES (6, 'John Doe1', 'john5.doe6@example.com', 29)";
-
+    public void getStudent(Long id) throws Exception {
+            String sql = "SELECT * FROM students WHERE id = ?";
 //            String sql = "SELECT * FROM students";
+        try(
+                Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ) {
+            Class.forName(dbDriver);
+            System.out.println("Connection established successfully");
 
-//            String sql = "UPDATE students SET name = 'John Doe1' WHERE id = 2";
+            preparedStatement.setLong(1, id);
+             try(
+                     ResultSet result = preparedStatement.executeQuery(); // SELECT, READ
+                     ) {
+                List<String> studentList = new ArrayList<>();
+                while (result.next()) {
+                    Student modifiedStudent = mapToStudent(result);
+                    String studentToString = modifiedStudent.toString();
+                    studentList.add(studentToString);
+                }
+                System.out.println("StudentList : " + studentList);
+             } catch(Exception ex){
+                 ex.printStackTrace();
+                 System.out.println("Failed to get student");
+                 throw ex;
+             }
 
-            String sql = "DELETE FROM students WHERE id = 2";
 
-            boolean result = statement.execute(sql); // SELECT, READ
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Failed to establish connection");
+            throw e;
+        }
+    }
 
+    public void completeCrud(Student student, Long id) throws Exception {
+            String sql = "INSERT INTO students (id, name, email, age) VALUES (?, ?, ?, ?)";
+//            String sql = "SELECT * FROM students";
+//            String sql = "UPDATE students SET name = ? WHERE id = ?";
+//        String sql = "DELETE FROM students WHERE id = ?";
+        try(
+                Connection connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+                PreparedStatement preparedStatement = connection.prepareStatement(sql);
+                ) {
+            Class.forName(dbDriver);
+
+            System.out.println("Connection established successfully");
+
+            preparedStatement.setLong(1, id);
+            preparedStatement.setString(2, student.getName());
+            preparedStatement.setString(3, student.getEmail());
+            preparedStatement.setInt(4, student.getAge());
+
+            boolean result = preparedStatement.execute(); // SELECT, READ
             if (result) {
-                ResultSet resultSet = statement.getResultSet();
+                ResultSet resultSet = preparedStatement.getResultSet();
 
                 if (resultSet == null) {
                     throw new SQLException("Result set is null");
@@ -235,41 +161,26 @@ public class StudentRepository {
                 List<String> studentList = new ArrayList<>();
                 System.out.println("---------------------------------");
                 while (resultSet.next()) {
-                    Student student = mapToStudent(resultSet);
-                    String studentToString = student.toString();
+                    Student modifiedStudent = mapToStudent(resultSet);
+                    String studentToString = modifiedStudent.toString();
                     studentList.add(studentToString);
-                    System.out.println(student);
+                    System.out.println(studentToString);
                 }
                 System.out.println("---------------------------------");
 
                 System.out.println("StudentList : " + studentList);
             } else {
-                int rowsAffected = statement.getUpdateCount();
+                int rowsAffected = preparedStatement.getUpdateCount();
 
                 if(rowsAffected == 0) {
                     throw new SQLException("Failed to insert student");
                 } else {
                     System.out.println("Student inserted successfully");
                 }
-
             }
-
-
-
-
-            // --------------------------------------------------- //
-            statement.close();
-            connection.close();
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
-        } finally {
-            if (statement != null) {
-                statement.close();
-            }
-            if (connection != null) {
-                connection.close();
-            }
         }
     }
 
